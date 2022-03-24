@@ -1,0 +1,287 @@
+= Git session part deux
+:toc: macro
+:toclevels: 1
+
+Some tips and suggested ways to work through common Git scenarios
+
+image::./part-deux.jpg[]
+
+toc::[]
+
+== Remove an unwanted commit
+
+To remove unwanted commit(s), for example, if you have accidentally added a bad commit, you can remove by squashing, and dropping the bad commit, for example:
+
+[source,terminal]
+----
+$ git rebase -i HEAD~2
+----
+
+Change pick to drop in the commit message on the wrong commit and then:
+
+[source,terminal]
+----
+$ git push origin <feature_branch> --force
+----
+
+== What files changed in last x commits?
+
+For example, the last three commits:
+
+[source,terminal]
+----
+$ git diff --name-only HEAD HEAD~3
+----
+
+[source,terminal]
+----
+modules/olm-catalogsource.adoc
+modules/olm-creating-fb-catalog-image.adoc
+modules/olm-mirroring-catalog-airgapped.adoc
+modules/olm-mirroring-catalog-colocated.adoc
+modules/rosa-sts-setting-up-environment.adoc
+modules/virt-configuring-masquerade-mode-dual-stack.adoc
+----
+
+== Restore a file to latest merged version
+
+[source,terminal]
+----
+$ git checkout main -- installing/installing-mirroring-installation-images.adoc
+----
+
+== Renaming files
+
+You can `git mv` a file from an old name to a new name.
+
+Use:
+
+[source,terminal]
+----
+$ git mv <source> <destination>
+----
+
+[NOTE]
+====
+If you don't use `git mv`, Git tries to auto-detect renames or moves on `git add` or `git commit`. If a file is deleted and a new file is created, and those files have a majority of lines in common, Git will automatically detect that the file was moved. `git mv` isn’t required.
+====
+
+== Delete the most recent commit without destroying the work
+
+[source,terminal]
+----
+$ git reset --soft HEAD~1
+----
+
+== Delete the most recent commit and remove the changes
+
+[source,terminal]
+----
+$ git reset --hard HEAD~1
+----
+
+== I've got a bad feeling about this
+
+Check what HEAD is set to in the current branch:
+
+[source,terminal]
+----
+$ cat .git/HEAD
+----
+
+The HEAD should match the current branch name, for example:
+
+.Example output
+[source,terminal]
+----
+ref: refs/heads/my-example-branch
+----
+
+[NOTE]
+====
+For the `main` feature branch, you should see `refs/heads/main`.
+====
+
+== Oh no! I've totally ruined my feature branch and I want to return it to pristine condition before any commits
+
+Reset hard and then push:
+
+[source,terminal]
+----
+$ git reset --hard upstream/main
+----
+
+[source,terminal]
+----
+$ git-push-force
+----
+
+For a branch based on (for example), enterprise-4.10:
+
+[source,terminal]
+----
+$ git reset --hard upstream/enterprise-4.10
+----
+
+[source,terminal]
+----
+$ git-push-force
+----
+
+== Oh no! I've pushed an incorrect commit to a PR by mistake!
+
+Get the commit ID for the bad commit from `git log` and revert the commit, then push your changes. A new revert commit is added to the PR.
+
+[source,terminal]
+----
+$ git-log-branch
+----
+
+[source,terminal]
+----
+$ git revert 16bf19550b9f49bceec7fda7f765040357e0bcaf
+----
+
+[source,terminal]
+----
+$ git push
+----
+
+== Oh no! I want to reset to the last good commit on my local branch
+
+Reset to last good commit:
+
+[source,terminal]
+----
+$ git-log-branch
+----
+
+[source,terminal]
+----
+$ git reset 16bf19550b9f49bceec7fda7f765040357e0bcaf
+----
+
+[source,terminal]
+----
+$ git add .
+----
+
+[source,terminal]
+----
+$ git commit -m "reseting to last good commit"
+----
+
+[source,terminal]
+----
+$ git-push-force
+----
+
+=== Oh no! I rebased from main instead of enterprise-x.x!
+
+Do the below to undo a completed rebase
+
+[source,terminal]
+----
+git reflog
+----
+
+Find the commit just before the incorrect rebase, e.g., `HEAD@{2}`, then:
+
+[source,terminal]
+----
+git reset --hard HEAD@{2}
+----
+
+== Oh no! I messed up and committed + pushed to a branch that I should have forked from
+
+Force a change to the server with the last good commit, for example:
+
+[source,terminal]
+----
+$ git push -f origin 17c44cc:enterprise-4.6
+----
+
+Then force local on the same commit:
+
+[source,terminal]
+----
+$ git reset --hard 17c44cc
+----
+
+== Creating a new PR on a new branch from a single commit on another branch
+
+*Scenario* You have merged a PR to main, and you also want to make those changes on enterprise-4.9, and for whatever reason, the cherrypick to enterprise-4.9 fails on the original PR. To get the work into enterprise-4.9, you need to create a new PR from a fork of the enterprise-4.9 branch, and cherry-pick the original PR changes, fix the rebase issues, then create a new PR against the enterprise-4.9 branch.
+
+. Get the commit # of the PR that was merged to main, eg., `2d7a94bdce00bb5497576f7cbbc65b59b5c1fe82`
+
+. Checkout enterprise-4.9, and create a new fork from this branch. Make sure and rebase against upstream/enterprise-4.9, and fetch it to local.
+
+. Do the cherry-pick:
++
+[source,terminal]
+----
+$ git cherry-pick 2d7a94bdce00bb5497576f7cbbc65b59b5c1fe82 -m 1
+----
+
+. Rebase and merge/correct any changes. Complete the merge.
+
+. Push --force your changes.
+
+. Create a new PR.
+
+= Creating a global .gitignore file
+
+Create `~/.gitignore`, and add some text, for example:
+
+[source,terminal]
+----
+/home/aireilly/openshift-docs/openshift-docs.sublime-workspace
+/home/aireilly/openshift-docs/openshift-docs.sublime-project
+----
+
+Then update your git config to use this global `.gitignore`:
+
+[source,terminal]
+----
+$ git config --local -e
+----
+
+This should bring you into VIM mode looking at your local git config. Just make sure to add the excludesfile line under the [core] section and save it.
+
+[source,terminal]
+----
+  [core]
+      ... (existing configurations)
+      excludesfile = /home/aireilly/.gitignore
+
+  [remote "origin"]
+      ... (existing configurations)
+
+  [branch "main"]
+      ... (existing configurations)
+----
+
+Then run:
+
+[source,terminal]
+----
+$ git config --global core.excludesfile ~/.gitignore
+----
+
+That's it!
+
+You may also need to do
+
+[source,terminal]
+----
+$ git rm -r --cached .
+----
+
+and then
+
+[source,terminal]
+----
+$ git add .
+----
+
+Your ignore unwanted files are then registered as "new". then just unstage the changes to the ignored files. Done!

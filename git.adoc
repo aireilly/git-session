@@ -1,6 +1,10 @@
 = Git session
+:toc: macro
+:toclevels: 1
 
-Sharing some Git conveniences, `~/.bashrc` aliases, and scripts.
+Sharing some Git conveniences, `~/.bashrc` aliases, and scripts
+
+toc::[]
 
 == Create rebase and squash convenience scripts
 
@@ -145,7 +149,8 @@ cd to OCP docs folder, and try out the commands!
 ----
 alias git-open-modified='atom $(git diff-tree HEAD HEAD~1 --no-commit-id --name-only -r)'
 alias git-push-force='git push origin "$(git rev-parse --abbrev-ref HEAD)" --force-with-lease'
-alias git-commend-push-force='git commit --amend --reuse-message HEAD; git push --force-with-lease'
+alias git-set-upstream='git branch --set-upstream-to origin/"$(git rev-parse --abbrev-ref HEAD)"'
+alias git-commend-push-force='git commit --amend --reuse-message HEAD; git push origin "$(git rev-parse --abbrev-ref HEAD)" --force-with-lease'
 alias git-log-branch='git log --graph --abbrev-commit --decorate "$(git rev-parse --abbrev-ref HEAD)"'
 ----
 +
