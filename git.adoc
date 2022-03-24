@@ -71,7 +71,7 @@ fi
 CURRENT_BRANCH="$(git branch --show-current)"
 
 #Ensure you are not working off of the main branch.
-if [ "$CURRENT_BRANCH" == "$OPENSHIFT_MAIN_BRANCH" ]; then
+if [ "$CURRENT_BRANCH" = "$OPENSHIFT_MAIN_BRANCH" ]; then
   echo "ERROR: you must not execute this script on the $OPENSHIFT_MAIN_BRANCH branch."
   exit 1
 fi
@@ -80,7 +80,7 @@ fi
 git pull --rebase
 
 #Get the base branch. This will allow you to specify a release branch if necessary.
-read -p "Enter the name of the base branch for this branch? (e.g., main, enterprise-x.y): " BASE_BRANCH 
+read -p "Enter the name of the base branch for this branch? (e.g., main, enterprise-x.y): " BASE_BRANCH
 
 #Get the commit count using the base branch.
 COMMIT_COUNT=$(git rev-list --count --no-merges $BASE_BRANCH..HEAD)
@@ -110,7 +110,7 @@ if [ $ANSWER == "Y" -o $ANSWER = "y" ];
 then
   git reset --soft HEAD~$COMMIT_COUNT
   echo "Squashing $COMMIT_COUNT commits into 1 commit."
-  read -p "Provide a commit message: " COMMIT_MESSAGE 
+  read -p "Provide a commit message: " COMMIT_MESSAGE
   git commit -m "$CURRENT_BRANCH: $COMMIT_MESSAGE"
   git push --force-with-lease
 fi
