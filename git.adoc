@@ -43,7 +43,7 @@ git stash pop
 echo "Rebase successful." 1>&2
 ----
 
-. Create the file `git-squash-commmits` in `/usr/local/bin`:
+. Create the file `git-squash-commits` in `/usr/local/bin`:
 +
 [TIP]
 ====
