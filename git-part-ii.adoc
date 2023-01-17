@@ -176,20 +176,32 @@ $ git commit -m "reseting to last good commit"
 $ git-push-force
 ----
 
-=== Oh no! I rebased from main instead of enterprise-x.x!
+=== Oh no! I need to recover from an unsuccessful git rebase
 
-Do the below to undo a completed rebase
-
-[source,terminal]
-----
-git reflog
-----
-
-Find the commit just before the incorrect rebase, e.g., `HEAD@{2}`, then:
+Do the below to undo a completed rebase:
 
 [source,terminal]
 ----
-git reset --hard HEAD@{2}
+$ git reflog
+----
+
+.Example output
+[source,terminal]
+----
+$ git reflog
+222967b (HEAD -> main) HEAD@{0}: rebase (finish): returning to refs/heads/main
+222967b (HEAD -> main) HEAD@{1}: rebase (squash): My big rebase
+c388f0c HEAD@{2}: rebase (squash): # This is a combination of 20 commits
+56ee04d HEAD@{3}: rebase (start): checkout HEAD~20
+0a0f875 HEAD@{4}: commit: An old good commit
+[...]
+----
+
+Find the commit just before the incorrect rebase, e.g., `HEAD@{4}`, then:
+
+[source,terminal]
+----
+git checkout HEAD@{4}
 ----
 
 == Oh no! I messed up and committed + pushed to a branch that I should have forked from
